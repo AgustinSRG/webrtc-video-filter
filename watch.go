@@ -185,9 +185,10 @@ func runProcess(source url.URL, sourceStreamId string, destination url.URL, dest
 
 						// Run publishing process
 						go runPublish(sdpFile, destination, destinationStreamId, PublishOptions{
-							debug:     options.debug,
-							ffmpeg:    options.ffmpeg,
-							authToken: options.authTokenDestination,
+							debug:       options.debug,
+							ffmpeg:      options.ffmpeg,
+							authToken:   options.authTokenDestination,
+							videoFilter: options.videoFilter,
 						})
 					})
 

@@ -15,9 +15,10 @@ import (
 )
 
 type PublishOptions struct {
-	debug     bool
-	ffmpeg    string
-	authToken string
+	debug       bool
+	ffmpeg      string
+	authToken   string
+	videoFilter string
 }
 
 func runPublish(source string, destination url.URL, streamId string, options PublishOptions) {
@@ -40,7 +41,7 @@ func runPublish(source string, destination url.URL, streamId string, options Pub
 
 	// Pipe tracks and start FFMPEG
 	go pipeTrack(listenerVideo, videoTrack)
-	go runEncdingProcess(options.ffmpeg, source, listenerVideo.LocalAddr().String(), options.debug)
+	go runEncdingProcess(options.ffmpeg, source, listenerVideo.LocalAddr().String(), options.videoFilter, options.debug)
 
 	// Create peer connection
 	peerConnectionConfig := loadWebRTCConfig() // Load config

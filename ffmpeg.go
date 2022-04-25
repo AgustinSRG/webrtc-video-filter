@@ -8,7 +8,7 @@ import (
 	"os/exec"
 )
 
-func runEncdingProcess(ffmpegBin string, source string, videoUDP string, debug bool) {
+func runEncdingProcess(ffmpegBin string, source string, videoUDP string, videoFilter string, debug bool) {
 	args := make([]string, 1)
 
 	args[0] = ffmpegBin
@@ -16,7 +16,7 @@ func runEncdingProcess(ffmpegBin string, source string, videoUDP string, debug b
 	// INPUT
 	args = append(args, "-i", source)
 
-	// VIDEO
+	// VIDEO OPTIONS
 	args = append(args,
 		"-an",
 		"-vcodec", "libvpx",
@@ -25,6 +25,17 @@ func runEncdingProcess(ffmpegBin string, source string, videoUDP string, debug b
 		"-g", "10",
 		"-error-resilient", "1",
 		"-auto-alt-ref", "1",
+	)
+
+	// VIDEO FILTER
+	if videoFilter != "" {
+		args = append(args,
+			"-vf", videoFilter,
+		)
+	}
+
+	// VIDEO DESTINATION
+	args = append(args,
 		"-f", "rtp", "rtp://"+videoUDP+"?pkt_size=1200",
 	)
 

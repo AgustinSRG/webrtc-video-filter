@@ -12,7 +12,7 @@ import (
 )
 
 func createForwardSDPFile(port int) string {
-	fileName := "wrtc-source.sdp"
+	fileName := "wrtc-source." + fmt.Sprint(port) + ".sdp"
 
 	nl := "\n"
 
