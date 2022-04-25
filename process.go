@@ -7,6 +7,7 @@ import "net/url"
 type ProcessOptions struct {
 	debug                bool
 	ffmpeg               string
+	videoFilter          string
 	authTokenSource      string
 	authTokenDestination string
 }

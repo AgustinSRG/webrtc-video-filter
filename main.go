@@ -80,6 +80,7 @@ func main() {
 	}
 
 	debug := false
+	videoFilter := ""
 	authTokenSource := ""
 	authTokenDest := ""
 
@@ -94,6 +95,13 @@ func main() {
 				return
 			}
 			ffmpegPath = args[i+1]
+			i++
+		} else if arg == "--video-filter" || arg == "-vf" {
+			if i == len(args)-3 {
+				fmt.Println("The option '--video-filter' requires a value")
+				return
+			}
+			videoFilter = args[i+1]
 			i++
 		} else if arg == "--auth-source" || arg == "-as" {
 			if i == len(args)-3 {
@@ -128,6 +136,7 @@ func main() {
 	runProcess(wsURLSource, streamIdSource, wsURLDest, streamIdDest, ProcessOptions{
 		debug:                debug,
 		ffmpeg:               ffmpegPath,
+		videoFilter:          videoFilter,
 		authTokenSource:      authTokenSource,
 		authTokenDestination: authTokenDest,
 	})
