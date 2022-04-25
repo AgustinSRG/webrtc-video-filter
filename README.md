@@ -50,6 +50,7 @@ Here is a list of all the options:
 |---|---|
 | `--help, -h` | Shows the command line options |
 | `--version, -v` | Shows the version |
+| `--port, -p <port>` | Sets the port to use to forward the RTP packets to FFmpeg. By default, the port 400 is used. |
 | `--video-filter, -vf <filter>` | Sets the video filter for FFmpeg |
 | `--debug` | Enables debug mode (prints more messages) |
 | `--ffmpeg-path <path>` | Sets the FFMpeg path. By default is `/usr/bin/ffmpeg`. You can also change it with the environment variable `FFMPEG_PATH` |

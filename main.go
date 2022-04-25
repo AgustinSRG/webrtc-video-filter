@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 )
 
 // Program entry point
@@ -83,6 +84,7 @@ func main() {
 	videoFilter := ""
 	authTokenSource := ""
 	authTokenDest := ""
+	port := 4000
 
 	for i := 1; i < (len(args) - 2); i++ {
 		arg := args[i]
@@ -117,6 +119,17 @@ func main() {
 			}
 			authTokenDest = args[i+1]
 			i++
+		} else if arg == "--port" || arg == "-p" {
+			if i == len(args)-3 {
+				fmt.Println("The option '--port' requires a value")
+				return
+			}
+			port, err = strconv.Atoi(args[i+1])
+			if err != nil || port <= 0 {
+				fmt.Println("The option '--port' requires a numeric value")
+				return
+			}
+			i++
 		} else if arg == "--secret" || arg == "-s" {
 			if i == len(args)-3 {
 				fmt.Println("The option '--secret' requires a value")
@@ -135,6 +148,7 @@ func main() {
 
 	runProcess(wsURLSource, streamIdSource, wsURLDest, streamIdDest, ProcessOptions{
 		debug:                debug,
+		port:                 port,
 		ffmpeg:               ffmpegPath,
 		videoFilter:          videoFilter,
 		authTokenSource:      authTokenSource,
@@ -149,7 +163,8 @@ func printHelp() {
 	fmt.Println("    OPTIONS:")
 	fmt.Println("        --help, -h                              Prints command line options.")
 	fmt.Println("        --version, -v                           Prints version.")
-	fmt.Println("        --video-filter, -vf <filter>            Sets video filter")
+	fmt.Println("        --port, -p <filter>                     Sets the port to use (By default 4000).")
+	fmt.Println("        --video-filter, -vf <filter>            Sets video filter.")
 	fmt.Println("        --debug                                 Enables debug mode.")
 	fmt.Println("        --ffmpeg-path <path>                    Sets FFMpeg path.")
 	fmt.Println("        --auth-source, -as <auth-token>         Sets authentication token for the source.")

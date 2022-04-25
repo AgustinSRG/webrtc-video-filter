@@ -11,6 +11,7 @@ temp
 
 .env
 *.log
+*.sdp
 *.bat
 *.mp4
 *.webm

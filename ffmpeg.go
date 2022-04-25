@@ -8,30 +8,13 @@ import (
 	"os/exec"
 )
 
-func runEncdingProcess(ffmpegBin string, source string, videoUDP string, audioUDP string, debug bool, loop bool) {
+func runEncdingProcess(ffmpegBin string, source string, videoUDP string, debug bool) {
 	args := make([]string, 1)
 
 	args[0] = ffmpegBin
 
-	args = append(args, "-re")
-
-	if loop {
-		args = append(args, "-stream_loop", "-1")
-	}
-
 	// INPUT
 	args = append(args, "-i", source)
-
-	// AUDIO
-	args = append(args,
-		"-vn",
-		"-acodec", "libopus",
-		"-ssrc", "1",
-		"-payload_type", "111",
-		"-max_delay", "0",
-		"-application", "lowdelay",
-		"-f", "rtp", "rtp://"+audioUDP+"?pkt_size=1200",
-	)
 
 	// VIDEO
 	args = append(args,

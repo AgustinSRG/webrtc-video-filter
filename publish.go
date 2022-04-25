@@ -1,4 +1,4 @@
-// Publishing script
+// Code to publish the filtered video track
 
 package main
 
@@ -15,23 +15,13 @@ import (
 )
 
 type PublishOptions struct {
-	loop      bool
 	debug     bool
 	ffmpeg    string
 	authToken string
 }
 
 func runPublish(source string, destination url.URL, streamId string, options PublishOptions) {
-	// Create UDP listeners
-	listenerAudio, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")})
-	if err != nil {
-		panic(err)
-	}
-
-	if options.debug {
-		fmt.Println("UDP Listener openned for audio: " + fmt.Sprint(listenerAudio.LocalAddr().String()))
-	}
-
+	// Create UDP listener
 	listenerVideo, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")})
 	if err != nil {
 		panic(err)
@@ -48,15 +38,9 @@ func runPublish(source string, destination url.URL, streamId string, options Pub
 		panic(err)
 	}
 
-	audioTrack, err := webrtc.NewTrackLocalStaticRTP(webrtc.RTPCodecCapability{MimeType: webrtc.MimeTypeOpus}, "audio", "pion")
-	if err != nil {
-		panic(err)
-	}
-
 	// Pipe tracks and start FFMPEG
-	go pipeTrack(listenerAudio, audioTrack)
 	go pipeTrack(listenerVideo, videoTrack)
-	go runEncdingProcess(options.ffmpeg, source, listenerVideo.LocalAddr().String(), listenerAudio.LocalAddr().String(), options.debug, options.loop)
+	go runEncdingProcess(options.ffmpeg, source, listenerVideo.LocalAddr().String(), options.debug)
 
 	// Create peer connection
 	peerConnectionConfig := loadWebRTCConfig() // Load config
@@ -95,7 +79,7 @@ func runPublish(source string, destination url.URL, streamId string, options Pub
 			lock.Unlock()
 
 			if options.debug {
-				fmt.Println(">>>\n" + string(heartbeatMessage.serialize()))
+				fmt.Println("[DESTINATION] >>>\n" + string(heartbeatMessage.serialize()))
 			}
 
 			if sendErr != nil {
@@ -112,13 +96,14 @@ func runPublish(source string, destination url.URL, streamId string, options Pub
 	}
 	pubMsg.params["Request-ID"] = "pub01"
 	pubMsg.params["Stream-ID"] = streamId
+	pubMsg.params["Stream-Type"] = "VIDEO"
 	if options.authToken != "" {
 		pubMsg.params["Auth"] = options.authToken
 	}
 	c.WriteMessage(websocket.TextMessage, []byte(pubMsg.serialize()))
 
 	if options.debug {
-		fmt.Println(">>>\n" + string(pubMsg.serialize()))
+		fmt.Println("[DESTINATION] >>>\n" + string(pubMsg.serialize()))
 	}
 
 	// ICE Candidate handler
@@ -144,7 +129,7 @@ func runPublish(source string, destination url.URL, streamId string, options Pub
 
 		c.WriteMessage(websocket.TextMessage, []byte(candidateMsg.serialize()))
 		if options.debug {
-			fmt.Println(">>>\n" + string(candidateMsg.serialize()))
+			fmt.Println("[DESTINATION] >>>\n" + string(candidateMsg.serialize()))
 		}
 	})
 
@@ -154,9 +139,9 @@ func runPublish(source string, destination url.URL, streamId string, options Pub
 		defer lock.Unlock()
 
 		if state == webrtc.PeerConnectionStateClosed || state == webrtc.PeerConnectionStateFailed {
-			fmt.Println("WebRTC: Disconnected")
+			fmt.Println("[DESTINATION] WebRTC: Disconnected")
 		} else if state == webrtc.PeerConnectionStateConnected {
-			fmt.Println("WebRTC: Connected")
+			fmt.Println("[DESTINATION] WebRTC: Connected")
 		}
 	})
 
@@ -210,13 +195,6 @@ func runPublish(source string, destination url.URL, streamId string, options Pub
 
 					// Add tracks
 
-					audioSender, err := peerConnection.AddTrack(audioTrack)
-					if err != nil {
-						fmt.Println("Error: " + err.Error())
-					}
-
-					go readPacketsFromRTPSender(audioSender)
-
 					videoSender, err := peerConnection.AddTrack(videoTrack)
 					if err != nil {
 						fmt.Println("Error: " + err.Error())
@@ -255,7 +233,7 @@ func runPublish(source string, destination url.URL, streamId string, options Pub
 					c.WriteMessage(websocket.TextMessage, []byte(answerMsg.serialize()))
 
 					if options.debug {
-						fmt.Println(">>>\n" + string(answerMsg.serialize()))
+						fmt.Println("[DESTINATION] >>>\n" + string(answerMsg.serialize()))
 					}
 				}
 			} else if msg.method == "CANDIDATE" {
@@ -275,7 +253,7 @@ func runPublish(source string, destination url.URL, streamId string, options Pub
 					}
 				}
 			} else if msg.method == "CLOSE" {
-				fmt.Println("Connection closed by remote host.")
+				fmt.Println("[DESTINATION] Connection closed by remote host.")
 				killProcess()
 			}
 		}()
