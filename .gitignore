@@ -1,0 +1,17 @@
+# Binary files
+
+webrtc-video-filter.exe
+webrtc-video-filter
+
+# Ignore temp files
+
+temp
+
+# Ignore .env
+
+.env
+*.log
+*.bat
+*.mp4
+*.webm
+test.txt
