@@ -13,6 +13,10 @@ func runEncdingProcess(ffmpegBin string, source string, videoUDP string, videoFi
 
 	args[0] = ffmpegBin
 
+	args = append(args, "-re")
+
+	args = append(args, "-protocol_whitelist", "file,sdp,udp,rtp")
+
 	// INPUT
 	args = append(args, "-i", source)
 
