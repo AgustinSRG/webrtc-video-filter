@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+
+	child_process_manager "github.com/AgustinSRG/go-child-process-manager"
 )
 
 func runEncdingProcess(ffmpegBin string, source string, videoUDP string, videoFilter string, debug bool) {
@@ -51,7 +53,18 @@ func runEncdingProcess(ffmpegBin string, source string, videoUDP string, videoFi
 		fmt.Println("Running command: " + cmd.String())
 	}
 
-	err := cmd.Run()
+	child_process_manager.ConfigureCommand(cmd)
+
+	err := cmd.Start()
+
+	if err != nil {
+		fmt.Println("Error: ffmpeg program failed: " + err.Error())
+		os.Exit(1)
+	}
+
+	child_process_manager.AddChildProcess(cmd.Process)
+
+	err = cmd.Wait()
 
 	if err != nil {
 		fmt.Println("Error: ffmpeg program failed: " + err.Error())

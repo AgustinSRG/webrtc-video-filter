@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+
+	child_process_manager "github.com/AgustinSRG/go-child-process-manager"
 )
 
 // Program entry point
@@ -145,6 +147,13 @@ func main() {
 		fmt.Println("Error: Could not find 'ffmpeg' at specified location: " + ffmpegPath)
 		return
 	}
+
+	err = child_process_manager.InitalizeChildProcessManager()
+	if err != nil {
+		fmt.Println("Error: " + err.Error())
+		os.Exit(1)
+	}
+	defer child_process_manager.DisposeChildProcessManager()
 
 	runProcess(wsURLSource, streamIdSource, wsURLDest, streamIdDest, ProcessOptions{
 		debug:                debug,
